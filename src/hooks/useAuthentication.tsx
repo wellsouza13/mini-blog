@@ -1,5 +1,4 @@
 import {
-  getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile,
@@ -7,6 +6,7 @@ import {
   User,
 } from "firebase/auth";
 import { useState, useEffect } from "react";
+import { auth } from "../firebase/config";
 import { AuthData } from "../interface/pages/useAuthentication";
 
 type ErrorType = string | null;
@@ -15,10 +15,7 @@ type LoadingType = boolean;
 export const useAuthentication = () => {
   const [error, setError] = useState<ErrorType>(null);
   const [loading, setLoading] = useState<LoadingType>(false);
-
   const [cancelled, setCancelled] = useState(false);
-
-  const auth = getAuth();
 
   const checkIfIsCancelled = () => {
     if (cancelled) {
@@ -28,21 +25,20 @@ export const useAuthentication = () => {
   };
 
   const createUser = async (data: AuthData): Promise<User | void> => {
-    if (checkIfIsCancelled()) return;
+    // if (checkIfIsCancelled()) return;
 
     setLoading(true);
 
     try {
-      const { user } = await createUserWithEmailAndPassword(
-        auth,
-        data.email,
-        data.password
-      );
+      console.log("Tentando criar usuário com:", data);
+      const { user } = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      console.log("Usuário criado:", user);
 
       if (data.displayName) {
         await updateProfile(user, {
           displayName: data.displayName,
         });
+        console.log("Perfil atualizado com displayName:", data.displayName);
       }
 
       setLoading(false);
@@ -51,11 +47,11 @@ export const useAuthentication = () => {
       setLoading(false);
 
       if (error instanceof Error) {
+        console.error("Erro ao criar usuário:", error.message);
         let systemErrorMessage;
 
         if (error.message.includes("Password")) {
-          systemErrorMessage =
-            "A senha precisa conter pelo menos 6 caracteres.";
+          systemErrorMessage = "A senha precisa conter pelo menos 6 caracteres.";
         } else if (error.message.includes("email-already")) {
           systemErrorMessage = "E-mail já cadastrado.";
         } else {
@@ -80,7 +76,7 @@ export const useAuthentication = () => {
   };
 
   const login = async (data: AuthData): Promise<void> => {
-    if (checkIfIsCancelled()) return;
+    // if (checkIfIsCancelled()) return;
 
     setLoading(true);
     setError(null);
@@ -92,6 +88,7 @@ export const useAuthentication = () => {
       setLoading(false);
 
       if (error instanceof Error) {
+        console.error("Erro ao fazer login:", error.message);
         let systemErrorMessage;
 
         if (error.message.includes("user-not-found")) {

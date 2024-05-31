@@ -3,8 +3,10 @@ import "./styles.css";
 import { LoginForm } from "../../interface/pages/login";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Loginschema } from "../../schemas/login";
+import { useAuth } from "../../contexts/AuthContext";
 
 export const Login = () => {
+  const { login } = useAuth();
   const {
     handleSubmit,
     register,
@@ -13,8 +15,8 @@ export const Login = () => {
     resolver: yupResolver(Loginschema),
   });
 
-  const onSubmit = ({ email, password }: LoginForm) => {
-    console.log("onSubmit", email, password);
+  const onSubmit = async ({ email, password }: LoginForm) => {
+    await login({ email, password });
   };
 
   return (
@@ -29,7 +31,7 @@ export const Login = () => {
             placeholder="E-mail do usuário"
             {...register("email", { required: true })}
           />
-          { errors.email && <p className="error">{errors?.email?.message}</p> }
+          {errors.email && <p className="error">{errors?.email?.message}</p>}
         </label>
         <label>
           <span>Senha:</span>
@@ -38,7 +40,7 @@ export const Login = () => {
             placeholder="Insira a senha"
             {...register("password", { required: true })}
           />
-          { errors.password && <p className="error">{errors?.password?.message}</p> }
+          {errors.password && <p className="error">{errors?.password?.message}</p>}
         </label>
         <button className="btn" type="submit">Entrar</button>
       </form>

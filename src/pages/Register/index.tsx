@@ -3,8 +3,10 @@ import "./styles.css";
 import { RegisterForm } from "../../interface/pages/register";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Registerschema } from "../../schemas/register";
+import { useAuth } from "../../contexts/AuthContext";
 
-export const Register = () => {
+export const Register: React.FC = () => {
+  const { createUser, error, loading } = useAuth();
   const {
     handleSubmit,
     register,
@@ -13,9 +15,10 @@ export const Register = () => {
     resolver: yupResolver(Registerschema)
   });
 
-  const onSubmit = (data: RegisterForm) => {
-    console.log("onSubmit", data);
+  const onSubmit = async (data: RegisterForm) => {
+    await createUser(data);
   };
+
   return (
     <div className="register">
       <h1>Cadastrar</h1>
@@ -27,6 +30,7 @@ export const Register = () => {
             type="text"
             placeholder="Nome do usuário"
             {...register("displayName", { required: true })}
+            autoComplete="name"
           />
           {errors.displayName && (<p className="error">{errors.displayName.message}</p>)}
         </label>
@@ -36,6 +40,7 @@ export const Register = () => {
             type="email"
             placeholder="E-mail do usuário"
             {...register("email", { required: true })}
+            autoComplete="email"
           />
           {errors.email && (<p className="error">{errors.email.message}</p>)}
         </label>
@@ -45,6 +50,7 @@ export const Register = () => {
             type="password"
             placeholder="Insira a senha"
             {...register("password", { required: true })}
+            autoComplete="new-password"
           />
           {errors.password && (<p className="error">{errors.password.message}</p>)}
         </label>
@@ -54,11 +60,14 @@ export const Register = () => {
             type="password"
             placeholder="Confirme a senha"
             {...register("confirmPassword", { required: true })}
+            autoComplete="new-password"
           />
           {errors.confirmPassword && (<p className="error">{errors.confirmPassword.message}</p>)}
         </label>
-        <button className="btn">Cadastrar</button>
+        <button className="btn" disabled={loading}>Cadastrar</button>
+        {error && <p className="error">{error}</p>}
       </form>
     </div>
   );
 };
+
